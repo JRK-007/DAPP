@@ -46,7 +46,7 @@
         </button>
       </div>
       <div class="mt-4 p-2 bg-yellow-900 bg-opacity-50 rounded text-xs text-yellow-300">
-        <strong>Warning:</strong> Unauthorized (0x580f...5e9) fails. Government (0x1208...c0e): View-only.
+        <strong>Warning:</strong> Unauthorized (0x580f...5e9) & Government (0x1208...c0e) mapped for testing. Gov: View-only. Unauthorized: Fails.
       </div>
       <p class="text-xs text-gray-500 text-center mt-2">Auto-connect attempts on load. Wrong account? Switch in MetaMask.</p>
     </div>
@@ -61,7 +61,7 @@
           <div>
             <label class="block text-sm font-medium mb-2">Upload File/Folder</label>
             <input type="file" id="ipfsFile" class="block w-full text-sm text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer bg-gray-700 rounded-lg" multiple />
-            <p class="text-xs text-gray-400 mt-1">Max 100MB. Uses Pinata (keys set).</p>
+            <p class="text-xs text-gray-400 mt-1">Max 100MB. Uses Pinata public gateway (add keys below). Local IPFS needs CORS-enabled node.</p>
           </div>
           <div class="flex gap-3">
             <button id="uploadIPFS" class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-2 rounded-lg hover:from-indigo-700 hover:to-purple-700 transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
@@ -90,33 +90,17 @@
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <!-- Logistics Officer -->
         <div id="officerActions" class="hidden bg-gray-800 rounded-lg p-6 shadow-xl">
-          <h3 class="text-xl font-bold mb-4 text-blue-400">👮 Logistics Officer Actions</h3>
-          <!-- Register Asset -->
-          <div class="mb-6 p-4 bg-gray-900 rounded-lg">
-            <h4 class="font-semibold mb-3">Register Asset</h4>
-            <div class="space-y-3">
-              <input id="assetId" type="number" placeholder="Asset ID" class="w-full bg-gray-700 text-white p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-              <input id="assetName" placeholder="Name" class="w-full bg-gray-700 text-white p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-              <input id="supplierName" placeholder="Supplier" class="w-full bg-gray-700 text-white p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-              <input id="ipfsHashInput" placeholder="IPFS Hash" class="w-full bg-gray-700 text-white p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-              <textarea id="note" placeholder="Notes" class="w-full bg-gray-700 text-white p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" rows="2"></textarea>
-              <button id="registerBtn" class="w-full bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 font-semibold transition flex items-center justify-center gap-2 disabled:opacity-50">
-                <span id="registerBtnText">Register</span>
-                <div id="registerLoader" class="loader hidden"></div>
-              </button>
-            </div>
-          </div>
-          <!-- Change Supplier -->
-          <div class="p-4 bg-gray-900 rounded-lg">
-            <h4 class="font-semibold mb-3">Change Supplier</h4>
-            <div class="space-y-3">
-              <input id="changeId" type="number" placeholder="Asset ID" class="w-full bg-gray-700 text-white p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-              <input id="newSupplier" placeholder="New Supplier" class="w-full bg-gray-700 text-white p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-              <button id="changeSupplierBtn" class="w-full bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 font-semibold transition flex items-center justify-center gap-2 disabled:opacity-50">
-                <span id="changeSupplierBtnText">Change</span>
-                <div id="changeSupplierLoader" class="loader hidden"></div>
-              </button>
-            </div>
+          <h3 class="text-xl font-bold mb-4 text-blue-400">👮 Register Asset</h3>
+          <div class="space-y-3">
+            <input id="assetId" type="number" placeholder="Asset ID" class="w-full bg-gray-700 text-white p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+            <input id="assetName" placeholder="Name" class="w-full bg-gray-700 text-white p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+            <input id="supplierName" placeholder="Supplier" class="w-full bg-gray-700 text-white p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+            <input id="ipfsHashInput" placeholder="IPFS Hash" class="w-full bg-gray-700 text-white p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+            <textarea id="note" placeholder="Notes" class="w-full bg-gray-700 text-white p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" rows="2"></textarea>
+            <button id="registerBtn" class="w-full bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 font-semibold transition flex items-center justify-center gap-2 disabled:opacity-50">
+              <span id="registerBtnText">Register</span>
+              <div id="registerLoader" class="loader hidden"></div>
+            </button>
           </div>
         </div>
         <!-- Depot Manager -->
@@ -203,18 +187,19 @@
   </div>
   <script>
     let web3, contract, account, currentRole;
-    const CONTRACT_ADDRESS = "0xDD10d50BB5bf22ea363Dc1B873aF386A9E0A7014";
-    const PINATA_API_KEY = "dbefbe6519cba1ecace8";
+    const CONTRACT_ADDRESS = "0xDD10d50BB5bf22ea363Dc1B873aF386A9E0A7014"; // DEPLOY ON REMIX & REPLACE THIS - OR IT ALL FAILS
+    const PINATA_API_KEY = "dbefbe6519cba1ecace8"; // GET FREE @ pinata.cloud
     const PINATA_SECRET = "c5f57d56415753a0179c3dda20e1d732400e5e8930369a805fcbac39ac654066";
-    // Fixed ROLES (added Government)
+
+    // Hardcoded addresses (lowercase)
     const ROLES = {
       'Logistics Officer': '0x84be682c7eb7cb778c2d062596c404a08b93f2a6',
       'Depot Manager': '0x8434bcc016df78caf6f1d469d44714334229d232',
       'Auditor': '0xac4336fa91e6b2b849115c0c5f9f0a37c47594d7',
-      'Government': '0x120837db0c8e662875082055eb2195bab5b66c0e',
       'Unauthorized': '0x580f2cae6f05b2649b424d090e9494b2717355e9'
     };
-    // Full ABI (unchanged, covers all functions/events)
+
+    // Full ABI
     const CONTRACT_ABI = [
       {"inputs":[],"stateMutability":"nonpayable","type":"constructor"},
       {"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"assetId","type":"uint256"},{"indexed":false,"internalType":"address","name":"auditor","type":"address"},{"indexed":false,"internalType":"string","name":"auditNote","type":"string"},{"indexed":false,"internalType":"uint256","name":"time","type":"uint256"}],"name":"AssetAudited","type":"event"},
@@ -233,6 +218,7 @@
       {"inputs":[{"internalType":"uint256","name":"assetId","type":"uint256"},{"internalType":"string","name":"name","type":"string"},{"internalType":"string","name":"supplier","type":"string"},{"internalType":"string","name":"ipfsHash","type":"string"},{"internalType":"string","name":"note","type":"string"}],"name":"registerAsset","outputs":[],"stateMutability":"nonpayable","type":"function"},
       {"inputs":[{"internalType":"uint256","name":"assetId","type":"uint256"},{"internalType":"address","name":"newHolder","type":"address"},{"internalType":"string","name":"newStatus","type":"string"},{"internalType":"string","name":"note","type":"string"}],"name":"transferAsset","outputs":[],"stateMutability":"nonpayable","type":"function"}
     ];
+
     // Utilities
     function showToast(message, type = 'info') {
       const toast = document.getElementById('toast');
@@ -242,6 +228,7 @@
       toast.classList.remove('hidden');
       setTimeout(() => toast.classList.add('hidden'), 5000);
     }
+
     function setLoading(btnId, loaderId, loading, text = '') {
       const btn = document.getElementById(btnId);
       const loader = document.getElementById(loaderId);
@@ -255,12 +242,15 @@
         if (textEl) textEl.textContent = text;
       }
     }
+
     function formatAddress(addr) {
       return addr ? ${addr.slice(0, 6)}...${addr.slice(-4)} : '';
     }
+
     function formatDate(timestamp) {
       return new Date(Number(timestamp) * 1000).toLocaleString();
     }
+
     // Auto-Connect on Load
     async function initAutoConnect() {
       if (!window.ethereum) return showToast('No MetaMask. Install it.', 'error');
@@ -274,7 +264,9 @@
           accounts = await web3.eth.getAccounts();
         }
         account = accounts[0];
+
         contract = new web3.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
+
         // Cross-check with contract roles
         const [contractOfficer, contractDepot, contractAuditor, contractOwner] = await Promise.all([
           contract.methods.logisticsOfficer().call(),
@@ -282,6 +274,7 @@
           contract.methods.agencyAuditor().call(),
           contract.methods.owner().call()
         ]);
+
         const normAccount = account.toLowerCase();
         let role = null;
         if (normAccount === ROLES['Logistics Officer'].toLowerCase() || normAccount === contractOfficer.toLowerCase()) role = 'Logistics Officer';
@@ -289,18 +282,23 @@
         else if (normAccount === ROLES['Auditor'].toLowerCase() || normAccount === contractAuditor.toLowerCase()) role = 'Auditor';
         else if (normAccount === ROLES['Government'].toLowerCase() || normAccount === contractOwner.toLowerCase()) role = 'Government';
         else if (normAccount === ROLES['Unauthorized'].toLowerCase()) return showToast('Unauthorized account detected. Access denied.', 'error');
+
         if (!role) return showToast(`Account ${formatAddress(account)} unmatched. Expected: ${Object.entries(ROLES).map(([r, a]) => ${r}=${formatAddress(a)}).join(', ')}`, 'error');
+
         currentRole = role;
         const network = await web3.eth.net.getNetworkType();
         document.getElementById('networkInfo').innerHTML = <span class="text-green-400">● Auto-Connected</span> | ${network} | Chain: ${chainId};
         document.getElementById('accountDisplay').innerHTML = <span class="text-gray-400">Role:</span> <span class="font-bold text-${role === 'Logistics Officer' ? 'blue' : role === 'Depot Manager' ? 'green' : role === 'Auditor' ? 'purple' : 'gray'}-400">${role}</span> | <code class="text-cyan-400">${formatAddress(account)}</code>;
+
         document.getElementById('loginSection').classList.add('hidden');
         document.getElementById('mainContent').classList.remove('hidden');
         document.getElementById('disconnectBtn').classList.remove('hidden');
+
         if (role === 'Logistics Officer') document.getElementById('officerActions').classList.remove('hidden');
         if (role === 'Depot Manager') document.getElementById('depotActions').classList.remove('hidden');
         if (role === 'Auditor') document.getElementById('auditorActions').classList.remove('hidden');
         if (role === 'Government') document.getElementById('govActions').classList.remove('hidden');
+
         showToast(Auto-connected as ${role}., 'success');
         loadEventLogs();
       } catch (error) {
@@ -308,12 +306,16 @@
         showToast(Auto-connect failed: ${error.message}. Use buttons or fix contract address., 'error');
       }
     }
+
     // Fallback buttons
     document.getElementById('loginOfficer').onclick = () => { currentRole = 'Logistics Officer'; initAutoConnect(); };
     document.getElementById('loginDepot').onclick = () => { currentRole = 'Depot Manager'; initAutoConnect(); };
     document.getElementById('loginAuditor').onclick = () => { currentRole = 'Auditor'; initAutoConnect(); };
+
     document.getElementById('disconnectBtn').onclick = () => location.reload();
+
     window.addEventListener('load', initAutoConnect);
+
     // IPFS (Public Gateway Only - Fixed)
     document.getElementById('uploadIPFS').onclick = async () => {
       const files = Array.from(document.getElementById('ipfsFile').files);
@@ -349,10 +351,12 @@
         setLoading('uploadIPFS', 'uploadLoader', false, 'Upload');
       }
     };
+
     document.getElementById('copyHashBtn').onclick = () => {
       navigator.clipboard.writeText(document.getElementById('ipfsHashDisplay').textContent);
       showToast('Copied.', 'success');
     };
+
     // Register
     document.getElementById('registerBtn').onclick = async () => {
       const [id, name, supplier, ipfsHash, note] = [
@@ -375,25 +379,7 @@
         setLoading('registerBtn', 'registerLoader', false, 'Register');
       }
     };
-    // Change Supplier (New)
-    document.getElementById('changeSupplierBtn').onclick = async () => {
-      const [id, newSupplier] = [
-        parseInt(document.getElementById('changeId').value),
-        document.getElementById('newSupplier').value.trim()
-      ];
-      if (!id || !newSupplier) return showToast('Fill all fields.', 'warning');
-      setLoading('changeSupplierBtn', 'changeSupplierLoader', true);
-      try {
-        const tx = await contract.methods.changeSupplier(id, newSupplier).send({ from: account });
-        showToast(Supplier changed for ${id}. Tx: ${formatAddress(tx.transactionHash)}, 'success');
-        document.getElementById('changeId').value = document.getElementById('newSupplier').value = '';
-        loadEventLogs();
-      } catch (e) {
-        showToast(e.message, 'error');
-      } finally {
-        setLoading('changeSupplierBtn', 'changeSupplierLoader', false, 'Change');
-      }
-    };
+
     // Transfer
     document.getElementById('transferBtn').onclick = async () => {
       const [id, newHolder, status, note] = [
@@ -416,6 +402,7 @@
         setLoading('transferBtn', 'transferLoader', false, 'Transfer');
       }
     };
+
     // Audit
     document.getElementById('auditBtn').onclick = async () => {
       const [id, note] = [
@@ -435,6 +422,7 @@
         setLoading('auditBtn', 'auditLoader', false, 'Audit');
       }
     };
+
     // View
     document.getElementById('viewBtn').onclick = async () => {
       const id = parseInt(document.getElementById('viewId').value);
@@ -473,19 +461,20 @@
         document.getElementById('viewLoader').classList.add('hidden');
       }
     };
+
     // Events
     async function loadEventLogs() {
       if (!contract) return;
       try {
         const events = await contract.getPastEvents('allEvents', { fromBlock: 0, toBlock: 'latest' });
         document.getElementById('eventLogs').innerHTML = events.reverse().slice(0, 10).map(e => {
-          const color = e.event === 'AssetRegistered' ? 'blue' : e.event === 'AssetTransferred' ? 'green' : e.event === 'AssetAudited' ? 'purple' : e.event === 'SupplierChanged' ? 'yellow' : 'gray';
+          const color = e.event === 'AssetRegistered' ? 'blue' : e.event === 'AssetTransferred' ? 'green' : e.event === 'AssetAudited' ? 'purple' : 'yellow';
           return `<div class="bg-gray-900 border-l-4 border-${color}-500 p-3 rounded">
             <div class="flex justify-between mb-1">
               <span class="font-bold text-sm">${e.event}</span>
               <span class="text-xs text-gray-500">Block ${e.blockNumber}</span>
             </div>
-            <div class="text-xs text-gray-400">ID: ${e.returnValues.assetId || ''} | ${e.returnValues.name || e.returnValues.oldSupplier || ''}</div>
+            <div class="text-xs text-gray-400">ID: ${e.returnValues.assetId || ''} | ${e.returnValues.name || ''}</div>
           </div>`;
         }).join('') || '<p class="text-gray-400 text-center py-4">No events</p>';
       } catch (e) {
@@ -494,7 +483,8 @@
       }
     }
     document.getElementById('refreshEvents').onclick = loadEventLogs;
-    // Load All Assets (Scans 1-100)
+
+    // Load All Assets (New: Scans 1-100)
     document.getElementById('loadAllBtn').onclick = async () => {
       if (!contract) return showToast('Connect first.', 'warning');
       const listEl = document.getElementById('assetsList');
@@ -523,6 +513,7 @@
         listEl.innerHTML = '<p class="text-gray-400 text-center py-4">Scan error</p>';
       }
     };
+
     // Search
     document.getElementById('searchAsset').oninput = (e) => {
       if (e.target.value.length >= 3) {
