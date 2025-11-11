@@ -10,10 +10,12 @@
     .loader { border: 3px solid #f3f3f3; border-top: 3px solid #3b82f6; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     .hidden { display: none; }
+    .copy-btn { cursor: pointer; }
   </style>
 </head>
 <body class="bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 text-white min-h-screen">
   <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+    <!-- Header -->
     <div class="text-center mb-8">
       <h1 class="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300 mb-2">
         Defence Logistics Management
@@ -21,12 +23,14 @@
       <p class="text-gray-400">Blockchain-Powered Asset Tracking System</p>
     </div>
 
+    <!-- Connection Status -->
     <div id="connectionStatus" class="bg-gray-800 rounded-lg p-4 mb-6 flex items-center justify-between flex-wrap gap-4">
       <div id="networkInfo" class="text-sm text-gray-400">Not Connected</div>
       <div id="accountDisplay" class="text-sm"></div>
       <button id="disconnectBtn" class="hidden bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700">Disconnect</button>
     </div>
 
+    <!-- Login Fallback -->
     <div id="loginSection" class="bg-gray-800 rounded-lg p-6 mb-6">
       <h2 class="text-2xl font-bold mb-4 text-center">Select Role (If Auto-Detect Fails)</h2>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -49,6 +53,7 @@
       <p class="text-xs text-gray-500 text-center mt-2">Auto-connect on load. Switch account in MetaMask if wrong.</p>
     </div>
 
+    <!-- Main Content -->
     <div id="mainContent" class="hidden">
       <!-- IPFS Upload -->
       <div class="bg-gray-800 rounded-lg p-6 mb-6 shadow-xl">
@@ -76,8 +81,9 @@
         </div>
       </div>
 
-      <!-- Actions Grid -->
+      <!-- Role Actions -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <!-- Logistics Officer -->
         <div id="officerActions" class="hidden bg-gray-800 rounded-lg p-6 shadow-xl">
           <h3 class="text-xl font-bold mb-4 text-blue-400">Logistics Officer</h3>
           <div class="space-y-4">
@@ -88,7 +94,7 @@
             <textarea id="note" placeholder="Notes" class="w-full bg-gray-700 p-3 rounded-lg" rows="2"></textarea>
             <button id="registerBtn" class="w-full bg-blue-600 hover:bg-blue-700 py-3 rounded-lg font-bold flex justify-center items-center gap-2">
               <span id="registerBtnText">Register Asset</span>
-              <div id="registerLoader" class="loader hidden"></div>
+              <div id="registerLoader" class="loader hidden">';</div>
             </button>
             <hr class="border-gray-700">
             <input id="changeId" type="number" placeholder="Asset ID (Change Supplier)" class="w-full bg-gray-700 p-3 rounded-lg">
@@ -100,6 +106,7 @@
           </div>
         </div>
 
+        <!-- Depot Manager -->
         <div id="depotActions" class="hidden bg-gray-800 rounded-lg p-6 shadow-xl">
           <h3 class="text-xl font-bold mb-4 text-green-400">Transfer Asset</h3>
           <div class="space-y-3">
@@ -121,6 +128,7 @@
           </div>
         </div>
 
+        <!-- Auditor -->
         <div id="auditorActions" class="hidden bg-gray-800 rounded-lg p-6 shadow-xl">
           <h3 class="text-xl font-bold mb-4 text-purple-400">Audit Asset</h3>
           <input id="auditId" type="number" placeholder="Asset ID" class="w-full bg-gray-700 p-3 rounded-lg mb-3">
@@ -131,11 +139,13 @@
           </button>
         </div>
 
+        <!-- Government (View Only) -->
         <div id="govActions" class="hidden bg-gray-800 rounded-lg p-6 shadow-xl col-span-1 lg:col-span-2">
           <h3 class="text-xl font-bold mb-4 text-gray-400">Government / Owner: View-Only Access</h3>
           <p class="text-gray-300">You can view assets and history. No transactions allowed.</p>
         </div>
 
+        <!-- View Asset -->
         <div class="bg-gray-800 rounded-lg p-6 shadow-xl col-span-1 lg:col-span-2">
           <h3 class="text-xl font-bold mb-4">View Asset</h3>
           <div class="flex gap-3">
@@ -148,6 +158,7 @@
         </div>
       </div>
 
+      <!-- Asset Details -->
       <div id="assetDetailsSection" class="hidden bg-gray-800 rounded-lg p-6 shadow-xl mb-6">
         <h3 class="text-xl font-bold mb-4">Asset Details</h3>
         <div id="assetDetails" class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm"></div>
@@ -157,6 +168,7 @@
         </div>
       </div>
 
+      <!-- Events -->
       <div class="bg-gray-800 rounded-lg p-6 shadow-xl mb-6">
         <div class="flex justify-between items-center mb-4">
           <h3 class="text-xl font-bold">Recent Events</h3>
@@ -165,6 +177,7 @@
         <div id="eventLogs" class="space-y-3 max-h-96 overflow-y-auto text-sm"></div>
       </div>
 
+      <!-- All Assets -->
       <div class="bg-gray-800 rounded-lg p-6 shadow-xl">
         <div class="flex justify-between items-center mb-4 flex-wrap gap-3">
           <h3 class="text-xl font-bold">All Assets</h3>
@@ -179,6 +192,7 @@
       </div>
     </div>
 
+    <!-- Toast -->
     <div id="toast" class="fixed bottom-4 right-4 bg-gray-800 border-l-4 rounded-lg p-4 shadow-2xl hidden max-w-md z-50"></div>
   </div>
 
@@ -198,14 +212,13 @@
       'Unauthorized': '0x580f2cae6f05b2649b424d090e9494b2717355e9'
     };
 
-    const CONTRACT_ABI = [ /* YOUR FULL ABI - unchanged */ 
+    const CONTRACT_ABI = [
       {"inputs":[],"stateMutability":"nonpayable","type":"constructor"},
       {"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"assetId","type":"uint256"},{"indexed":false,"internalType":"address","name":"auditor","type":"address"},{"indexed":false,"internalType":"string","name":"auditNote","type":"string"},{"indexed":false,"internalType":"uint256","name":"time","type":"uint256"}],"name":"AssetAudited","type":"event"},
       {"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"assetId","type":"uint256"},{"indexed":false,"internalType":"string","name":"name","type":"string"},{"indexed":false,"internalType":"string","name":"supplier","type":"string"},{"indexed":false,"internalType":"string","name":"ipfsHash","type":"string"},{"indexed":false,"internalType":"address","name":"holder","type":"address"},{"indexed":false,"internalType":"uint256","name":"time","type":"uint256"}],"name":"AssetRegistered","type":"event"},
       {"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"assetId","type":"uint256"},{"indexed":false,"internalType":"address","name":"from","type":"address"},{"indexed":false,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"string","name":"newStatus","type":"string"},{"indexed":false,"internalType":"string","name":"note","type":"string"},{"indexed":false,"internalType":"uint256","name":"time","type":"uint256"}],"name":"AssetTransferred","type":"event"},
       {"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"assetId","type":"uint256"},{"indexed":false,"internalType":"string","name":"oldSupplier","type":"string"},{"indexed":false,"internalType":"string","name":"newSupplier","type":"string"},{"indexed":false,"internalType":"uint256","name":"time","type":"uint256"}],"name":"SupplierChanged","type":"event"},
       {"inputs":[],"name":"agencyAuditor","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},
-      {"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"assetRecords","outputs":[{"internalType":"string","name":"name","type":"string"},{"internalType":"string","name":"supplier","type":"string"},{"internalType":"address","name":"currentHolder","type":"address"},{"internalType":"uint256","name":"registeredAt","type":"uint256"},{"internalType":"string","name":"ipfsHash","type":"string"}],"stateMutability":"view","type":"function"},
       {"inputs":[{"internalType":"uint256","name":"assetId","type":"uint256"},{"internalType":"string","name":"note","type":"string"}],"name":"auditAsset","outputs":[],"stateMutability":"nonpayable","type":"function"},
       {"inputs":[{"internalType":"uint256","name":"assetId","type":"uint256"},{"internalType":"string","name":"newSupplier","type":"string"}],"name":"changeSupplier","outputs":[],"stateMutability":"nonpayable","type":"function"},
       {"inputs":[],"name":"depotManager","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},
@@ -226,19 +239,19 @@
         warning: 'border-yellow-500 bg-yellow-900',
         info: 'border-blue-500 bg-blue-900'
       };
-      toast.className = `fixed bottom-4 right-4 ${colors[type]} border-l-4 rounded-lg p-4 shadow-2xl max-w-md z-50`;
+      toast.className = `fixed bottom-4 right-4 ${colors[type]} border-l-4 rounded-lg p-4 shadow-2xl max-w-md z-50 transition-all duration-300`;
       toast.textContent = msg;
       toast.classList.remove('hidden');
       setTimeout(() => toast.classList.add('hidden'), 5000);
     }
 
-    function setLoading(btnId, loaderId, loading) {
+    function setLoading(btnId, loaderId, loading, text = '') {
       const btn = document.getElementById(btnId);
       const loader = document.getElementById(loaderId);
       const span = document.getElementById(btnId + 'Text') || btn.querySelector('span');
       btn.disabled = loading;
       loader.classList.toggle('hidden', !loading);
-      span.textContent = loading ? 'Processing...' : span.dataset.text;
+      if (text) span.textContent = loading ? text : span.dataset.default;
     }
 
     function formatAddress(addr) {
@@ -246,33 +259,36 @@
     }
 
     function formatDate(ts) {
-      return new Date(ts * 1000).toLocaleString('en-IN');
+      return new Date(ts * 1000).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
     }
 
-    // Save button text
-    document.querySelectorAll('[id$="BtnText"]').forEach(el => el.dataset.text = el.textContent);
+    // Save default button text
+    document.querySelectorAll('[id$="BtnText"]').forEach(el => el.dataset.default = el.textContent);
 
     // ==================== AUTO CONNECT ====================
     async function initAutoConnect() {
       if (typeof window.ethereum === 'undefined') {
-        showToast('MetaMask not detected! Install it.', 'error');
+        showToast('MetaMask not detected! Please install it.', 'error');
         return;
       }
 
       try {
         web3 = new Web3(window.ethereum);
-        await window.ethereum.request({ method: 'eth_requestAccounts' });
         const chainId = await web3.eth.getChainId();
         if (chainId !== 11155111) {
           showToast('Please switch to Sepolia Testnet', 'error');
           return;
         }
 
-        const accounts = await web3.eth.getAccounts();
+        let accounts = await web3.eth.getAccounts();
+        if (!accounts.length) {
+          await window.ethereum.request({ method: 'eth_requestAccounts' });
+          accounts = await web3.eth.getAccounts();
+        }
+
         account = accounts[0].toLowerCase();
         contract = new web3.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
 
-        // Fetch role addresses from contract
         const [officer, depot, auditor, owner] = await Promise.all([
           contract.methods.logisticsOfficer().call(),
           contract.methods.depotManager().call(),
@@ -282,6 +298,7 @@
 
         let role = null;
         const acc = account.toLowerCase();
+
         if (acc === ROLES['Logistics Officer'].toLowerCase() || acc === officer.toLowerCase()) role = 'Logistics Officer';
         else if (acc === ROLES['Depot Manager'].toLowerCase() || acc === depot.toLowerCase()) role = 'Depot Manager';
         else if (acc === ROLES['Auditor'].toLowerCase() || acc === auditor.toLowerCase()) role = 'Auditor';
@@ -323,7 +340,9 @@
     document.getElementById('uploadIPFS').onclick = async () => {
       const files = document.getElementById('ipfsFile').files;
       if (!files.length) return showToast('Select file(s)', 'warning');
-      setLoading('uploadIPFS', 'uploadLoader', true);
+      const totalSize = Array.from(files).reduce((a,f) => a + f.size, 0);
+      if (totalSize > 100 * 1024 * 1024) return showToast('Max 100MB', 'error');
+      setLoading('uploadIPFS', 'uploadLoader', true, 'Uploading...');
       try {
         const form = new FormData();
         for (let f of files) form.append('file', f);
@@ -340,7 +359,7 @@
         const hash = data.IpfsHash;
         document.getElementById('ipfsHashDisplay').textContent = hash;
         document.getElementById('ipfsFileName').textContent = Array.from(files).map(f => f.name).join(', ');
-        document.getElementById('ipfsFileSize').textContent = (Array.from(files).reduce((a,f)=>a+f.size,0)/1024/1024).toFixed(2) + ' MB';
+        document.getElementById('ipfsFileSize').textContent = (totalSize/1024/1024).toFixed(2) + ' MB';
         document.getElementById('ipfsUploadTime').textContent = new Date().toLocaleString();
         document.getElementById('ipfsGatewayLink').href = `https://ipfs.io/ipfs/${hash}`;
         document.getElementById('ipfsHashInput').value = hash;
@@ -349,7 +368,7 @@
       } catch (e) {
         showToast(e.message, 'error');
       } finally {
-        setLoading('uploadIPFS', 'uploadLoader', false);
+        setLoading('uploadIPFS', 'uploadLoader', false, 'Upload to IPFS');
       }
     };
 
@@ -358,7 +377,8 @@
       showToast('Hash Copied!', 'success');
     };
 
-    // ==================== ALL YOUR ORIGINAL FUNCTIONS (NOW WORKING) ====================
+    // ==================== ALL SOLIDITY FUNCTIONS ====================
+    // Register
     document.getElementById('registerBtn').onclick = async () => {
       if (currentRole !== 'Logistics Officer') return showToast('Only Logistics Officer', 'error');
       const id = document.getElementById('assetId').value.trim();
@@ -367,14 +387,14 @@
       const ipfs = document.getElementById('ipfsHashInput').value.trim();
       const note = document.getElementById('note').value.trim();
       if (!id || !name || !supplier || !ipfs) return showToast('Fill all fields', 'warning');
-      setLoading('registerBtn', 'registerLoader', true);
+      setLoading('registerBtn', 'registerLoader', true, 'Registering...');
       try {
         await contract.methods.registerAsset(id, name, supplier, ipfs, note).send({ from: account });
         showToast(`Asset ${id} registered!`, 'success');
         clearOfficerInputs();
         loadEventLogs();
       } catch (e) { showToast(e.message || 'Failed', 'error'); }
-      finally { setLoading('registerBtn', 'registerLoader', false); }
+      finally { setLoading('registerBtn', 'registerLoader', false, 'Register Asset'); }
     };
 
     function clearOfficerInputs() {
@@ -383,12 +403,13 @@
       document.getElementById('ipfsFile').value = '';
     }
 
+    // Change Supplier
     document.getElementById('changeSupplierBtn').onclick = async () => {
       if (currentRole !== 'Logistics Officer') return showToast('Only Logistics Officer', 'error');
       const id = document.getElementById('changeId').value.trim();
       const newSupp = document.getElementById('newSupplier').value.trim();
       if (!id || !newSupp) return showToast('Fill fields', 'warning');
-      setLoading('changeSupplierBtn', 'changeSupplierLoader', true);
+      setLoading('changeSupplierBtn', 'changeSupplierLoader', true, 'Updating...');
       try {
         await contract.methods.changeSupplier(id, newSupp).send({ from: account });
         showToast('Supplier updated', 'success');
@@ -396,9 +417,10 @@
         document.getElementById('newSupplier').value = '';
         loadEventLogs();
       } catch (e) { showToast(e.message, 'error'); }
-      finally { setLoading('changeSupplierBtn', 'changeSupplierLoader', false); }
+      finally { setLoading('changeSupplierBtn', 'changeSupplierLoader', false, 'Change Supplier'); }
     };
 
+    // Transfer
     document.getElementById('transferBtn').onclick = async () => {
       if (currentRole !== 'Depot Manager') return showToast('Only Depot Manager', 'error');
       const id = document.getElementById('transferId').value.trim();
@@ -407,22 +429,23 @@
       const note = document.getElementById('transferNote').value.trim();
       if (!id || !to || !status) return showToast('Fill all', 'warning');
       if (!web3.utils.isAddress(to)) return showToast('Invalid address', 'error');
-      setLoading('transferBtn', 'transferLoader', true);
+      setLoading('transferBtn', 'transferLoader', true, 'Transferring...');
       try {
         await contract.methods.transferAsset(id, to, status, note).send({ from: account });
         showToast('Transferred', 'success');
         ['transferId','newHolder','transferStatus','transferNote'].forEach(id => document.getElementById(id).value = '');
         loadEventLogs();
       } catch (e) { showToast(e.message, 'error'); }
-      finally { setLoading('transferBtn', 'transferLoader', false); }
+      finally { setLoading('transferBtn', 'transferLoader', false, 'Transfer'); }
     };
 
+    // Audit
     document.getElementById('auditBtn').onclick = async () => {
       if (currentRole !== 'Auditor') return showToast('Only Auditor', 'error');
       const id = document.getElementById('auditId').value.trim();
       const note = document.getElementById('auditNote').value.trim();
       if (!id || !note) return showToast('Fill fields', 'warning');
-      setLoading('auditBtn', 'auditLoader', true);
+      setLoading('auditBtn', 'auditLoader', true, 'Submitting...');
       try {
         await contract.methods.auditAsset(id, note).send({ from: account });
         showToast('Audit submitted', 'success');
@@ -430,9 +453,10 @@
         document.getElementById('auditNote').value = '';
         loadEventLogs();
       } catch (e) { showToast(e.message, 'error'); }
-      finally { setLoading('auditBtn', 'auditLoader', false); }
+      finally { setLoading('auditBtn', 'auditLoader', false, 'Submit Audit'); }
     };
 
+    // View Asset
     document.getElementById('viewBtn').onclick = async () => {
       const id = document.getElementById('viewId').value.trim();
       if (!id) return showToast('Enter ID', 'warning');
@@ -462,6 +486,7 @@
       finally { setLoading('viewBtn', 'viewLoader', false); }
     };
 
+    // Events
     async function loadEventLogs() {
       const div = document.getElementById('eventLogs');
       div.innerHTML = '<p class="text-gray-500">Loading...</p>';
@@ -481,6 +506,7 @@
     }
     document.getElementById('refreshEvents').onclick = loadEventLogs;
 
+    // Load All
     document.getElementById('loadAllBtn').onclick = async () => {
       const list = document.getElementById('assetsList');
       list.innerHTML = '<p class="text-gray-500">Scanning 1-100...</p>';
@@ -500,6 +526,7 @@
       `).join('');
     };
 
+    // Search
     document.getElementById('searchAsset').addEventListener('keypress', e => {
       if (e.key === 'Enter' && e.target.value.trim()) {
         document.getElementById('viewId').value = e.target.value.trim();
@@ -507,16 +534,15 @@
       }
     });
 
+    // Disconnect
     document.getElementById('disconnectBtn').onclick = () => location.reload();
 
-    // Manual login buttons
+    // Manual Login
     ['loginOfficer','loginDepot','loginAuditor'].forEach(id => {
-      document.getElementById(id).onclick = () => {
-        showToast('Switch account in MetaMask, then refresh', 'info');
-      };
+      document.getElementById(id).onclick = () => showToast('Switch account in MetaMask, then refresh', 'info');
     });
 
-    // ==================== AUTO START ====================
+    // ==================== START ====================
     window.addEventListener('load', initAutoConnect);
   </script>
 </body>
